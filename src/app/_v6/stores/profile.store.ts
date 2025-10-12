@@ -17,13 +17,13 @@ export class ProfileStore extends ComponentStore<ProfileState> {
 
   readonly loadProfile = this.effect((trigger$) =>
     trigger$.pipe(
-      tap(() => this.patchState({ loading: true })),
+      tap(() => this.patchState({ loading: true })), // show spinner before load
       switchMap(() =>
         this.profileService.loadProfile().pipe(
           tap({
-            next: (profile) => this.patchState({ profile, loading: false }),
+            next: (profile) => this.patchState({ profile, loading: false }), // hide spinner
             error: (err) =>
-              this.patchState({ loading: false, error: err.message }),
+              this.patchState({ loading: false, error: err.message }), // hide spinner on error
           })
         )
       )
@@ -32,12 +32,14 @@ export class ProfileStore extends ComponentStore<ProfileState> {
 
   readonly updateProfile = this.effect<UserProfile>((profile$) =>
     profile$.pipe(
+      tap(() => this.patchState({ loading: true })), // show spinner before save
       switchMap((profile) =>
         this.profileService.saveProfile(profile).pipe(
           tap({
             next: (updated) =>
-              this.patchState({ profile: updated, loading: false }),
-            error: (err) => this.patchState({ error: err.message }),
+              this.patchState({ profile: updated, loading: false }), // hide spinner
+            error: (err) =>
+              this.patchState({ loading: false, error: err.message }), // hide spinner on error
           })
         )
       )

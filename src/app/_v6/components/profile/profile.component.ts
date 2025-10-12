@@ -13,7 +13,7 @@ export class ProfileComponent implements OnInit {
   private readonly store = inject(ProfileStore);
   private readonly fb = inject(FormBuilder);
 
-  readonly vm$ = this.store.select((state) => ({
+  readonly vmProfileState$ = this.store.select((state) => ({
     profile: state.profile,
     loading: state.loading,
   }));
@@ -31,7 +31,7 @@ export class ProfileComponent implements OnInit {
     });
 
     // Subscribe to profile updates and patch the form when data arrives
-    this.vm$.subscribe(({ profile }) => {
+    this.vmProfileState$.subscribe(({ profile }) => {
       if (profile) {
         this.formProfile.patchValue(profile);
       }

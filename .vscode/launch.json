@@ -3,10 +3,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "ng serve",
+      "name": "debug",
       "type": "chrome",
       "request": "launch",
-      "preLaunchTask": "npm: start",
+      // "preLaunchTask": "npm: start",
       "url": "http://localhost:4200/"
     },
     {
@@ -15,6 +15,28 @@
       "request": "launch",
       "preLaunchTask": "npm: test",
       "url": "http://localhost:9876/debug.html"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug schematics",
+      //local path to schematics-cli -the schematics command line tool. The tool acts the same as the generate command of the Angular CLI, but also has a debug mode
+      // "program": "${workspaceRoot}/node_modules/@angular-devkit/schematics-cli/bin/schematics.js",
+      // my nvm path to schematics-cli
+      "program": "${userHome}/AppData/Roaming/nvm/v18.19.0/node_modules/@angular-devkit/schematics-cli/bin/schematics.js",
+      "outFiles": [],
+      "args": ["gis-ng-lib:copy-assets", "--project=gis-ng-lib-tester"],
+      // "stopOnEntry": true,
+      "preLaunchTask": "npm: build-all"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug ng generate schematics",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/node_modules/@angular/cli/bin/ng",
+      "args": ["generate", "gis-ng-lib:copy-assets", "--project=gis-ng-lib-tester"],
+      "console": "integratedTerminal"
     }
   ]
 }

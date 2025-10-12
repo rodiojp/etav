@@ -18,7 +18,7 @@ export class ProfileRepository {
    */
   getProfile(): Observable<UserProfile> {
     console.log('[Mock API] GET', this.baseUrl);
-    return of(this.mockProfile).pipe(delay(800)); // simulate 800ms latency
+    return of(this.mockProfile).pipe(delay(1000));
   }
 
   /**
@@ -31,7 +31,7 @@ export class ProfileRepository {
     this.mockProfile = { ...this.mockProfile, ...profile };
 
     return of(this.mockProfile).pipe(
-      delay(600), // simulate network delay
+      delay(2000), 
       map((updated) => {
         console.log('[Mock API] Response:', updated);
         return updated;

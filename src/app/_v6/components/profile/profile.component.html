@@ -1,6 +1,6 @@
-<div class="profile-container" *ngIf="vm$ | async as vm">
+<div class="profile-container" *ngIf="vmProfileState$ | async as vmProfileState">
   <!-- Loading Spinner -->
-  <div *ngIf="vm.loading" class="loading">
+  <div *ngIf="vmProfileState.loading" class="loading">
     <mat-progress-spinner
       mode="indeterminate"
       diameter="40"
@@ -10,10 +10,10 @@
   </div>
 
   <!-- Profile Form -->
-  <div *ngIf="!vm.loading && vm.profile" class="profile-form">
+  <div *ngIf="!vmProfileState.loading && vmProfileState.profile" class="profile-form">
     <h2>User Profile</h2>
 
-    <div>
+    <form [formGroup]="formProfile">
       <mat-card appearance="outlined">
         <mat-card-content>
           <div class="form-fields">
@@ -61,16 +61,16 @@
             mat-flat-button
             color="primary"
             (click)="onSave(formProfile.value)"
-            [disabled]="formProfile.invalid || vm.loading"
+            [disabled]="formProfile.invalid || vmProfileState.loading"
           >
-            {{ vm.loading ? "Saving..." : "Save" }}
+            {{ vmProfileState.loading ? 'Saving...' : 'Save' }}
           </button>
         </mat-card-actions>
       </mat-card>
-    </div>
+    </form>
   </div>
 
-  <div *ngIf="!vm.loading && !vm.profile" class="no-profile">
+  <div *ngIf="!vmProfileState.loading && !vmProfileState.profile" class="no-profile">
     <mat-card appearance="outlined">
       <mat-card-content>
         <p>No profile data available.</p>
