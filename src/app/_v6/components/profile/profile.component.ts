@@ -9,7 +9,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   styleUrl: './profile.component.scss',
 })
 export class ProfileComponent implements OnInit {
-  
+
   private readonly store = inject(ProfileStore);
   private readonly fb = inject(FormBuilder);
 
@@ -18,13 +18,13 @@ export class ProfileComponent implements OnInit {
     loading: state.loading,
   }));
 
-  form!: FormGroup;
+  formProfile!: FormGroup;
 
   ngOnInit() {
     this.store.loadProfile();
 
     // Build an empty form initially
-    this.form = this.fb.group({
+    this.formProfile = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       role: [''],
@@ -33,16 +33,16 @@ export class ProfileComponent implements OnInit {
     // Subscribe to profile updates and patch the form when data arrives
     this.vm$.subscribe(({ profile }) => {
       if (profile) {
-        this.form.patchValue(profile);
+        this.formProfile.patchValue(profile);
       }
     });
   }
 
   onSave(profile: any) {
-    if (this.form.valid) {
+    if (this.formProfile.valid) {
       this.store.updateProfile(profile);
     } else {
-      this.form.markAllAsTouched();
+      this.formProfile.markAllAsTouched();
     }
   }
 }
