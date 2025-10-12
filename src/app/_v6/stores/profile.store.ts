@@ -1,38 +1,43 @@
-import { Injectable } from "@angular/core";
-import { ProfileState } from "../models/profile.model";
+import { Injectable } from '@angular/core';
+import { ProfileState, UserProfile } from '../models/profile.model';
+import { ComponentStore } from '@ngrx/component-store';
+import { ProfileService } from '../services/profile.service';
+import { switchMap, tap } from 'rxjs';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class ProfileStore extends ComponentStore<ProfileState> {
-  readonly profile$ = this.select(s => s.profile);
-  readonly loading$ = this.select(s => s.loading);
+  readonly profile$ = this.select((s) => s.profile);
+  readonly loading$ = this.select((s) => s.loading);
 
   constructor(private profileService: ProfileService) {
     super({ profile: null, loading: false });
   }
 
-  readonly loadProfile = this.effect(trigger$ =>
+  readonly loadProfile = this.effect((trigger$) =>
     trigger$.pipe(
       tap(() => this.patchState({ loading: true })),
       switchMap(() =>
         this.profileService.loadProfile().pipe(
           tap({
-            next: profile => this.patchState({ profile, loading: false }),
-            error: err =>
-              this.patchState({ loading: false, error: err.message })
+            next: (profile) => this.patchState({ profile, loading: false }),
+            error: (err) =>
+              this.patchState({ loading: false, error: err.message }),
           })
         )
       )
     )
   );
 
-  readonly updateProfile = this.effect<UserProfile>(profile$ =>
+  readonly updateProfile = this.effect<UserProfile>((profile$) =>
     profile$.pipe(
-      switchMap(profile =>
+      switchMap((profile) =>
         this.profileService.saveProfile(profile).pipe(
           tap({
-            next: updated =>
+            next: (updated) =>
               this.patchState({ profile: updated, loading: false }),
-            error: err => this.patchState({ error: err.message })
+            error: (err) => this.patchState({ error: err.message }),
           })
         )
       )

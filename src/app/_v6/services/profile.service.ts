@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { ProfileRepository } from '../repositories/profile.repository';
 import { UserProfile } from '../models/profile.model';
 import { map } from 'rxjs';
@@ -7,7 +7,8 @@ import { map } from 'rxjs';
   providedIn: 'root',
 })
 export class ProfileService {
-  constructor(private repo: ProfileRepository) {}
+  
+  private readonly repo = inject(ProfileRepository);
 
   loadProfile() {
     return this.repo.getProfile();
