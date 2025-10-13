@@ -19,7 +19,8 @@ export class ProfileRepository {
    */
   getProfile(): Observable<UserProfile> {
     console.log('[Mock API] GET', this.baseUrl);
-    return of(this.mockProfile).pipe(delay(1000));
+    const delayMs = 2000;
+    return of(this.mockProfile).pipe(delay(delayMs));
   }
 
   /**

@@ -38,17 +38,23 @@
 
     <div class="actions">
       <mat-progress-spinner
-        *ngIf="vmSignal().loading"
+        *ngIf="vmSignal().loading || vmSignal().processing"
         diameter="20"
         mode="indeterminate"
       ></mat-progress-spinner>
-
+      <button
+        mat-flat-button
+        color="warn"
+        (click)="onProcess()"
+        [disabled]="vmSignal().loading || vmSignal().processing"
+      >
+        Process
+      </button>
       <button
         mat-flat-button
         color="primary"
-        type="button"
         (click)="onSave()"
-        [disabled]="vmSignal().loading"
+        [disabled]="vmSignal().loading || vmSignal().processing"
       >
         Save
       </button>

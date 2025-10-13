@@ -23,6 +23,7 @@ export class ProfileComponent {
   readonly vmSignal = this.store.selectSignal((state) => ({
     profile: state.profile,
     loading: state.loading,
+    processing: state.processing,
     error: state.error,
   }));
 
@@ -79,6 +80,20 @@ export class ProfileComponent {
       };
       console.log('Saving profile', profile);
       this.store.updateProfile(profile);
+    } else {
+      this.formProfile.markAllAsTouched();
+    }
+  }
+
+  onProcess() {
+    if (this.formProfile.valid) {
+      const viewModel = this.vmSignal();
+      const profile: UserProfile = {
+        ...viewModel.profile!,
+        ...this.formProfile.getRawValue(),
+      };
+      console.log('Processing profile', profile);
+      this.store.processProfile(profile);
     } else {
       this.formProfile.markAllAsTouched();
     }

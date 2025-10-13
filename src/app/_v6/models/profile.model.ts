@@ -8,11 +8,13 @@ export interface UserProfile {
 export interface ProfileState {
   profile: UserProfile | null;
   loading: boolean;
+  processing: boolean;
   error: string | null;
 }
 
 export const initialProfileState: ProfileState = {
   profile: null,
   loading: false,
+  processing: false,
   error: null,
 };

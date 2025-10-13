@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   ProfileState,
   UserProfile,
@@ -7,6 +7,7 @@ import {
 import { ComponentStore } from '@ngrx/component-store';
 import { ProfileService } from '../services/profile.service';
 import { catchError, finalize, of, switchMap, tap } from 'rxjs';
+import { ProfileProcessingService } from '../services/profile-processing.service';
 
 /**
  * ProfileStore manages the state of the user profile using ComponentStore.
@@ -18,7 +19,10 @@ import { catchError, finalize, of, switchMap, tap } from 'rxjs';
   providedIn: 'root',
 })
 export class ProfileStore extends ComponentStore<ProfileState> {
-  constructor(private profileService: ProfileService) {
+  private readonly profileService = inject(ProfileService);
+  private readonly profileProcessingService = inject(ProfileProcessingService);
+
+  constructor() {
     super(initialProfileState);
   }
 
@@ -50,6 +54,22 @@ export class ProfileStore extends ComponentStore<ProfileState> {
             return of(null);
           }),
           finalize(() => this.patchState({ loading: false }))
+        )
+      )
+    )
+  );
+
+  readonly processProfile = this.effect<UserProfile>((profile$) =>
+    profile$.pipe(
+      tap(() => this.patchState({ processing: true, error: null })),
+      switchMap((profile) =>
+        this.profileProcessingService.processProfile(profile).pipe(
+          tap((processed) => this.patchState({ profile: processed })),
+          catchError((err) => {
+            this.patchState({ error: err.message });
+            return of(null);
+          }),
+          finalize(() => this.patchState({ processing: false })) // reset processing
         )
       )
     )
