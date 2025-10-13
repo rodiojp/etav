@@ -18,9 +18,6 @@ import { finalize, switchMap, tap } from 'rxjs';
   providedIn: 'root',
 })
 export class ProfileStore extends ComponentStore<ProfileState> {
-  readonly profile$ = this.select((s) => s.profile);
-  readonly loading$ = this.select((s) => s.loading);
-  readonly profileState$ = this.select((profileState) => profileState);
 
   constructor(private profileService: ProfileService) {
     super(initialProfileState);

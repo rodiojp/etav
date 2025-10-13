@@ -20,13 +20,10 @@ export class ProfileComponent {
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly vmSignal = toSignal(
-    this.store.select((state) => ({
-      profile: state.profile,
-      loading: state.loading,
-    })),
-    { initialValue: { profile: null, loading: false } }
-  );
+  readonly vmSignal = this.store.selectSignal((state) => ({
+    profile: state.profile,
+    loading: state.loading,
+  }));
 
   readonly formProfile = this.fb.group({
     name: this.fb.nonNullable.control('', Validators.required),
