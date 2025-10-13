@@ -6,9 +6,9 @@ import {
   inject,
 } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { ProfileStore } from '../../stores/profile.store';
 import { UserProfile } from '../../models/profile.model';
+import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-profile',
@@ -23,7 +23,10 @@ export class ProfileComponent {
   readonly vmSignal = this.store.selectSignal((state) => ({
     profile: state.profile,
     loading: state.loading,
+    error: state.error,
   }));
+
+  readonly faExclamationTriangle = faExclamationTriangle;
 
   readonly formProfile = this.fb.group({
     name: this.fb.nonNullable.control('', Validators.required),

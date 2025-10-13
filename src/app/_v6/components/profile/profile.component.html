@@ -1,6 +1,11 @@
 <div class="profile-container" *ngIf="vmSignal().profile as profile">
   <h2>User Profile</h2>
 
+  <div *ngIf="vmSignal().error" class="error-banner">
+    <span class="error-icon"><fa-icon [icon]="faExclamationTriangle" /></span>
+    <span class="error-text">{{ vmSignal().error }}</span>
+  </div>
+
   <form [formGroup]="formProfile">
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Name</mat-label>

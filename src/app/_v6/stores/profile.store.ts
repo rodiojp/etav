@@ -6,7 +6,7 @@ import {
 } from '../models/profile.model';
 import { ComponentStore } from '@ngrx/component-store';
 import { ProfileService } from '../services/profile.service';
-import { finalize, switchMap, tap } from 'rxjs';
+import { catchError, finalize, of, switchMap, tap } from 'rxjs';
 
 /**
  * ProfileStore manages the state of the user profile using ComponentStore.
@@ -18,21 +18,21 @@ import { finalize, switchMap, tap } from 'rxjs';
   providedIn: 'root',
 })
 export class ProfileStore extends ComponentStore<ProfileState> {
-
   constructor(private profileService: ProfileService) {
     super(initialProfileState);
   }
 
   readonly loadProfile = this.effect((trigger$) =>
     trigger$.pipe(
-      tap(() => this.patchState({ loading: true })),
+      tap(() => this.patchState({ loading: true, error: null })),
       switchMap(() =>
         this.profileService.loadProfile().pipe(
-          tap({
-            next: (profile) => this.patchState({ profile }),
-            error: (err) => this.patchState({ error: err.message }),
+          tap((profile) => this.patchState({ profile })),
+          catchError((err) => {
+            this.patchState({ error: err.message });
+            return of(null);
           }),
-          finalize(() => this.patchState({ loading: false })) // always turn off loading
+          finalize(() => this.patchState({ loading: false }))
         )
       )
     )
@@ -40,15 +40,16 @@ export class ProfileStore extends ComponentStore<ProfileState> {
 
   readonly updateProfile = this.effect<UserProfile>((profile$) =>
     profile$.pipe(
-      tap(() => this.patchState({ loading: true })), // show spinner before save
+      tap(() => this.patchState({ loading: true, error: null })),
       switchMap((profile) =>
         this.profileService.saveProfile(profile).pipe(
-          tap({
-            next: (updated) => this.patchState({ profile: updated }),
-            error: (err) =>
-              this.patchState({ profile: null, error: err.message }),
+          tap((updated) => this.patchState({ profile: updated })),
+          catchError((err) => {
+            // Keep old profile visible, only update the error message
+            this.patchState({ error: err.message });
+            return of(null);
           }),
-          finalize(() => this.patchState({ loading: false })) // always hide spinner
+          finalize(() => this.patchState({ loading: false }))
         )
       )
     )

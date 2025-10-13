@@ -28,6 +28,10 @@ export class ProfileRepository {
   updateProfile(profile: UserProfile): Observable<UserProfile> {
     console.log('[Mock API] PUT', this.baseUrl, profile);
 
+    // random failure simulation
+    if (Math.random() < 0.5) {
+      return throwError(() => new Error('Random API failure'));
+    }
     // Simple validation
     if (!profile.name || !profile.email) {
       return throwError(() => new Error('Invalid profile data'));
