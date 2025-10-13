@@ -1,45 +1,83 @@
-import { Component, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  effect,
+  EffectRef,
+  inject,
+} from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ProfileStore } from '../../stores/profile.store';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UserProfile } from '../../models/profile.model';
 
 @Component({
   selector: 'app-profile',
-  standalone: false,
   templateUrl: './profile.component.html',
-  styleUrl: './profile.component.scss',
+  styleUrls: ['./profile.component.scss'],
 })
-export class ProfileComponent implements OnInit {
-
+export class ProfileComponent {
   private readonly store = inject(ProfileStore);
   private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
 
-  readonly vmProfileState$ = this.store.select((state) => ({
-    profile: state.profile,
-    loading: state.loading,
-  }));
+  readonly vmSignal = toSignal(
+    this.store.select((state) => ({
+      profile: state.profile,
+      loading: state.loading,
+    })),
+    { initialValue: { profile: null, loading: false } }
+  );
 
-  formProfile!: FormGroup;
+  readonly formProfile = this.fb.group({
+    name: this.fb.nonNullable.control('', Validators.required),
+    email: this.fb.nonNullable.control('', [
+      Validators.required,
+      Validators.email,
+    ]),
+    role: this.fb.control<string | null>(null),
+  });
 
-  ngOnInit() {
-    this.store.loadProfile();
+  // Effect defined as a class field, within the injection context
+  private readonly syncFormWithVm: EffectRef = effect(() => {
+    const { profile, loading } = this.vmSignal();
+    console.log('VM changed:', { profile, loading });
 
-    // Build an empty form initially
-    this.formProfile = this.fb.group({
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      role: [''],
-    });
+    // Disable/enable form based on loading
+    if (loading) {
+      this.formProfile.disable({ emitEvent: false });
+    } else {
+      this.formProfile.enable({ emitEvent: false });
+    }
 
-    // Subscribe to profile updates and patch the form when data arrives
-    this.vmProfileState$.subscribe(({ profile }) => {
-      if (profile) {
-        this.formProfile.patchValue(profile);
+    // Only patch form when profile changes (avoid re-patching during save)
+    if (profile && !loading) {
+      const current = this.formProfile.getRawValue();
+      const changed =
+        current.name !== profile.name ||
+        current.email !== profile.email ||
+        current.role !== profile.role;
+
+      if (changed) {
+        this.formProfile.patchValue(profile, { emitEvent: false });
       }
+    }
+  });
+
+  constructor() {
+    this.store.loadProfile();
+    this.destroyRef.onDestroy(() => {
+      this.syncFormWithVm.destroy();
     });
   }
 
-  onSave(profile: any) {
+  onSave() {
     if (this.formProfile.valid) {
+      const viewModel = this.vmSignal();
+      const profile: UserProfile = {
+        ...viewModel.profile!,
+        ...this.formProfile.getRawValue(),
+      };
+      console.log('Saving profile', profile);
       this.store.updateProfile(profile);
     } else {
       this.formProfile.markAllAsTouched();

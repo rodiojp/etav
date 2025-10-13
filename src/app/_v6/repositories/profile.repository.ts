@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { delay, map, Observable, of } from 'rxjs';
+import { delay, map, Observable, of, throwError } from 'rxjs';
 import { UserProfile } from '../models/profile.model';
 
 @Injectable({ providedIn: 'root' })
@@ -11,6 +11,7 @@ export class ProfileRepository {
     id: '123',
     name: 'John Doe',
     email: 'john.doe@example.com',
+    role: 'User',
   };
 
   /**
@@ -27,11 +28,16 @@ export class ProfileRepository {
   updateProfile(profile: UserProfile): Observable<UserProfile> {
     console.log('[Mock API] PUT', this.baseUrl, profile);
 
+    // Simple validation
+    if (!profile.name || !profile.email) {
+      return throwError(() => new Error('Invalid profile data'));
+    }
+
     // Fake update in memory
     this.mockProfile = { ...this.mockProfile, ...profile };
 
     return of(this.mockProfile).pipe(
-      delay(2000), 
+      delay(2000),
       map((updated) => {
         console.log('[Mock API] Response:', updated);
         return updated;

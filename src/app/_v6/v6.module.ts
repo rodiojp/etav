@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { ProfileComponent } from './components/profile/profile.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -18,7 +18,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    NoopAnimationsModule,
+    BrowserAnimationsModule,
     MatButtonModule,
   ],
   exports: [ProfileComponent],

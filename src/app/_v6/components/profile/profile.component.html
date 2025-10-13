@@ -1,80 +1,52 @@
-<div class="profile-container" *ngIf="vmProfileState$ | async as vmProfileState">
-  <!-- Loading Spinner -->
-  <div *ngIf="vmProfileState.loading" class="loading">
-    <mat-progress-spinner
-      mode="indeterminate"
-      diameter="40"
-      color="primary"
-    ></mat-progress-spinner>
-    <p>Loading profile...</p>
-  </div>
+<div class="profile-container" *ngIf="vmSignal().profile as profile">
+  <h2>User Profile</h2>
 
-  <!-- Profile Form -->
-  <div *ngIf="!vmProfileState.loading && vmProfileState.profile" class="profile-form">
-    <h2>User Profile</h2>
+  <form [formGroup]="formProfile">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" placeholder="Enter your name" />
+      <mat-error *ngIf="formProfile.get('name')?.hasError('required')">
+        Name is required
+      </mat-error>
+    </mat-form-field>
 
-    <form [formGroup]="formProfile">
-      <mat-card appearance="outlined">
-        <mat-card-content>
-          <div class="form-fields">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Name</mat-label>
-              <input
-                matInput
-                formControlName="name"
-                placeholder="Enter your name"
-              />
-              <mat-error *ngIf="formProfile.get('name')?.hasError('required')">
-                Name is required
-              </mat-error>
-            </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Email</mat-label>
+      <input
+        matInput
+        type="email"
+        formControlName="email"
+        placeholder="Enter your email"
+      />
+      <mat-error *ngIf="formProfile.get('email')?.hasError('required')">
+        Email is required
+      </mat-error>
+      <mat-error *ngIf="formProfile.get('email')?.hasError('email')">
+        Please enter a valid email address
+      </mat-error>
+    </mat-form-field>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Email</mat-label>
-              <input
-                matInput
-                type="email"
-                formControlName="email"
-                placeholder="Enter your email"
-              />
-              <mat-error *ngIf="formProfile.get('email')?.hasError('required')">
-                Email is required
-              </mat-error>
-              <mat-error *ngIf="formProfile.get('email')?.hasError('email')">
-                Please enter a valid email
-              </mat-error>
-            </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Role</mat-label>
+      <input matInput formControlName="role" placeholder="Enter your role" />
+    </mat-form-field>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Role</mat-label>
-              <input
-                matInput
-                formControlName="role"
-                placeholder="Enter your role"
-              />
-            </mat-form-field>
-          </div>
-        </mat-card-content>
+    <div class="actions">
+      <mat-progress-spinner
+        *ngIf="vmSignal().loading"
+        diameter="20"
+        mode="indeterminate"
+      ></mat-progress-spinner>
 
-        <mat-card-actions align="end">
-          <button
-            mat-flat-button
-            color="primary"
-            (click)="onSave(formProfile.value)"
-            [disabled]="formProfile.invalid || vmProfileState.loading"
-          >
-            {{ vmProfileState.loading ? 'Saving...' : 'Save' }}
-          </button>
-        </mat-card-actions>
-      </mat-card>
-    </form>
-  </div>
-
-  <div *ngIf="!vmProfileState.loading && !vmProfileState.profile" class="no-profile">
-    <mat-card appearance="outlined">
-      <mat-card-content>
-        <p>No profile data available.</p>
-      </mat-card-content>
-    </mat-card>
-  </div>
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        (click)="onSave()"
+        [disabled]="vmSignal().loading"
+      >
+        Save
+      </button>
+    </div>
+  </form>
 </div>
