@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { delay, map, Observable, of, throwError } from 'rxjs';
+import { delay, map, mergeMap, Observable, of, throwError, timer } from 'rxjs';
 import { UserProfile } from '../models/profile.model';
 
 @Injectable({ providedIn: 'root' })
@@ -27,21 +27,29 @@ export class ProfileRepository {
    */
   updateProfile(profile: UserProfile): Observable<UserProfile> {
     console.log('[Mock API] PUT', this.baseUrl, profile);
+    const delayMs = 2000;
 
-    // random failure simulation
-    if (Math.random() < 0.5) {
-      return throwError(() => new Error('Random API failure'));
-    }
-    // Simple validation
+    // Simple server validation
     if (!profile.name || !profile.email) {
-      return throwError(() => new Error('Invalid profile data'));
+      console.error('[Fake HTTP] Error:', 'Invalid profile data');
+      return timer(delayMs).pipe(
+        mergeMap(() => throwError(() => new Error('Invalid profile data')))
+      );
+    }
+
+    // Simulate random API failure
+    if (Math.random() < 0.5) {
+      console.error('[Fake HTTP] Error:', 'Random API failure');
+      return timer(delayMs).pipe(
+        mergeMap(() => throwError(() => new Error('Random API failure')))
+      );
     }
 
     // Fake update in memory
     this.mockProfile = { ...this.mockProfile, ...profile };
 
     return of(this.mockProfile).pipe(
-      delay(2000),
+      delay(delayMs),
       map((updated) => {
         console.log('[Mock API] Response:', updated);
         return updated;
