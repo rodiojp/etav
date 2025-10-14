@@ -1,5 +1,6 @@
 import {
   Component,
+  computed,
   DestroyRef,
   effect,
   EffectRef,
@@ -20,14 +21,23 @@ export class ProfileComponent {
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly vmSignal = this.store.selectSignal((state) => ({
+  readonly faExclamationTriangle = faExclamationTriangle;
+
+  readonly profileStateSignal = this.store.selectSignal((state) => ({
     profile: state.profile,
+  }));
+
+  readonly stateSignal = this.store.selectSignal((state) => ({
     loading: state.loading,
     processing: state.processing,
+    saveable: state.saveable,
     error: state.error,
   }));
 
-  readonly faExclamationTriangle = faExclamationTriangle;
+  // readonly vmSignal = computed(() => ({
+  //   ...this.profileStateSignal(),
+  //   ...this.stateSignal(),
+  // }));
 
   readonly formProfile = this.fb.group({
     name: this.fb.nonNullable.control('', Validators.required),
@@ -38,10 +48,18 @@ export class ProfileComponent {
     role: this.fb.control<string | null>(null),
   });
 
+  private lastProfileRef: UserProfile | null = null;
+
   // Effect defined as a class field, within the injection context
   private readonly syncFormWithVm: EffectRef = effect(() => {
-    const { profile, loading } = this.vmSignal();
+    const { profile } = this.profileStateSignal();
+    const { loading } = this.stateSignal(); // separate reactive dependency
     console.log('VM changed:', { profile, loading });
+    
+    // Only react if the actual profile object instance changes
+    if (profile === this.lastProfileRef) return;
+
+    this.lastProfileRef = profile;
 
     // Disable/enable form based on loading
     if (loading) {
@@ -64,8 +82,29 @@ export class ProfileComponent {
     }
   });
 
+  readonly canSave = computed(() => {
+    const state = this.stateSignal();
+    return (
+      this.formProfile.valid &&
+      state.saveable &&
+      !state.loading &&
+      !state.processing
+    );
+  });
+
+  readonly canProcess = computed(() => {
+    const state = this.stateSignal();
+    return this.formProfile.valid && !state.loading && !state.processing;
+  });
+
   constructor() {
     this.store.loadProfile();
+
+    // Track form changes to know if Save should be enabled
+    this.formProfile.valueChanges.subscribe((formValue) => {
+      this.store.updateSaveable(formValue as UserProfile);
+    });
+
     this.destroyRef.onDestroy(() => {
       this.syncFormWithVm.destroy();
     });
@@ -73,7 +112,7 @@ export class ProfileComponent {
 
   onSave() {
     if (this.formProfile.valid) {
-      const viewModel = this.vmSignal();
+      const viewModel = this.profileStateSignal();
       const profile: UserProfile = {
         ...viewModel.profile!,
         ...this.formProfile.getRawValue(),
@@ -87,7 +126,7 @@ export class ProfileComponent {
 
   onProcess() {
     if (this.formProfile.valid) {
-      const viewModel = this.vmSignal();
+      const viewModel = this.profileStateSignal();
       const profile: UserProfile = {
         ...viewModel.profile!,
         ...this.formProfile.getRawValue(),

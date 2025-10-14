@@ -36,7 +36,13 @@ export class ProfileStore extends ComponentStore<ProfileState> {
             this.patchState({ error: err.message });
             return of(null);
           }),
-          finalize(() => this.patchState({ loading: false }))
+          finalize(() =>
+            this.patchState({
+              loading: false,
+              saveable: false,
+              processing: false,
+            })
+          )
         )
       )
     )
@@ -47,13 +53,15 @@ export class ProfileStore extends ComponentStore<ProfileState> {
       tap(() => this.patchState({ loading: true, error: null })),
       switchMap((profile) =>
         this.profileService.saveProfile(profile).pipe(
-          tap((updated) => this.patchState({ profile: updated })),
+          tap((updated) =>
+            this.patchState({ profile: updated, saveable: false })
+          ),
           catchError((err) => {
             // Keep old profile visible, only update the error message
             this.patchState({ error: err.message });
             return of(null);
           }),
-          finalize(() => this.patchState({ loading: false }))
+          finalize(() => this.patchState({ loading: false })) // reset saveable
         )
       )
     )
@@ -64,14 +72,36 @@ export class ProfileStore extends ComponentStore<ProfileState> {
       tap(() => this.patchState({ processing: true, error: null })),
       switchMap((profile) =>
         this.profileProcessingService.processProfile(profile).pipe(
-          tap((processed) => this.patchState({ profile: processed })),
+          tap((processed) =>
+            this.patchState({ profile: processed, saveable: true })
+          ),
           catchError((err) => {
             this.patchState({ error: err.message });
             return of(null);
           }),
-          finalize(() => this.patchState({ processing: false })) // reset processing
+          finalize(() =>
+            this.patchState({
+              processing: false,
+            })
+          )
         )
       )
     )
+  );
+
+  readonly updateSaveable = this.updater<UserProfile>(
+    (state, currentFormValue) => {
+      const { profile } = state;
+      if (!profile) {
+        return { ...state, saveable: false };
+      }
+
+      const changed =
+        profile.name !== currentFormValue.name ||
+        profile.email !== currentFormValue.email ||
+        profile.role !== currentFormValue.role;
+
+      return { ...state, saveable: changed };
+    }
   );
 }

@@ -1,9 +1,9 @@
-<div class="profile-container" *ngIf="vmSignal().profile as profile">
+<div class="profile-container" *ngIf="profileStateSignal().profile as profile">
   <h2>User Profile</h2>
 
-  <div *ngIf="vmSignal().error" class="error-banner">
+  <div *ngIf="stateSignal().error" class="error-banner">
     <span class="error-icon"><fa-icon [icon]="faExclamationTriangle" /></span>
-    <span class="error-text">{{ vmSignal().error }}</span>
+    <span class="error-text">{{ stateSignal().error }}</span>
   </div>
 
   <form [formGroup]="formProfile">
@@ -38,7 +38,7 @@
 
     <div class="actions">
       <mat-progress-spinner
-        *ngIf="vmSignal().loading || vmSignal().processing"
+        *ngIf="stateSignal().loading || stateSignal().processing"
         diameter="20"
         mode="indeterminate"
       ></mat-progress-spinner>
@@ -46,7 +46,7 @@
         mat-flat-button
         color="warn"
         (click)="onProcess()"
-        [disabled]="vmSignal().loading || vmSignal().processing"
+        [disabled]="!canProcess()"
       >
         Process
       </button>
@@ -54,7 +54,7 @@
         mat-flat-button
         color="primary"
         (click)="onSave()"
-        [disabled]="vmSignal().loading || vmSignal().processing"
+        [disabled]="!canSave()"
       >
         Save
       </button>

@@ -9,6 +9,7 @@ export interface ProfileState {
   profile: UserProfile | null;
   loading: boolean;
   processing: boolean;
+  saveable: boolean;
   error: string | null;
 }
 
@@ -16,5 +17,6 @@ export const initialProfileState: ProfileState = {
   profile: null,
   loading: false,
   processing: false,
+  saveable: false,
   error: null,
 };
