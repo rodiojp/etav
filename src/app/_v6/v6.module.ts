@@ -13,6 +13,8 @@ import { BaseDialogComponent } from './components/dialog-one/base-dialog/base-di
 import { MatDialogModule } from '@angular/material/dialog';
 import { ProfileDialogTemplatesComponent } from './components/dialog-one/profile-dialog-templates/profile-dialog-templates.component';
 import { TestDialogComponent } from './components/dialog-one/test-dialog/test-dialog.component';
+import { DialogContentExampleComponent } from './components/profile/dialog-content-example/dialog-content-example.component';
+import { ProfileDialogComponent } from './components/profile/profile-dialog/profile-dialog.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +22,8 @@ import { TestDialogComponent } from './components/dialog-one/test-dialog/test-di
     BaseDialogComponent,
     ProfileDialogTemplatesComponent,
     TestDialogComponent,
+    DialogContentExampleComponent,
+    ProfileDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -34,6 +38,10 @@ import { TestDialogComponent } from './components/dialog-one/test-dialog/test-di
     MatInputModule,
     FontAwesomeModule,
   ],
-  exports: [ProfileComponent, TestDialogComponent],
+  exports: [
+    ProfileComponent,
+    TestDialogComponent,
+    DialogContentExampleComponent,
+  ],
 })
 export class V6Module {}

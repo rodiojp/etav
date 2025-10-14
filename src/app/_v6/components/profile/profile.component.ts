@@ -6,10 +6,11 @@ import {
   EffectRef,
   inject,
 } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder } from '@angular/forms';
 import { ProfileStore } from '../../stores/profile.store';
 import { UserProfile } from '../../models/profile.model';
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { createProfileForm, ProfileFormType } from './profile-form.factory';
 
 @Component({
   selector: 'app-profile',
@@ -34,14 +35,7 @@ export class ProfileComponent {
     error: state.error,
   }));
 
-  readonly formProfile = this.fb.group({
-    name: this.fb.nonNullable.control('', Validators.required),
-    email: this.fb.nonNullable.control('', [
-      Validators.required,
-      Validators.email,
-    ]),
-    role: this.fb.control<string | null>(null),
-  });
+  readonly formProfile: ProfileFormType = createProfileForm(this.fb);
 
   private lastProfileRef: UserProfile | null = null;
 
