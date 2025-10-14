@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { UserProfile } from '../models/profile.model';
+import { UserProfile } from '../../models/profile/profile.model';
 import { delay, map, Observable, of } from 'rxjs';
 
 @Injectable({

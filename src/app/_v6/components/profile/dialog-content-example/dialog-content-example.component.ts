@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { ProfileDialogComponent } from '../profile-dialog/profile-dialog.component';
-import { DialogManagerService } from '../../../services/dialog-manager.service';
-import { ProfileStore } from '../../../stores/profile.store';
+import { DialogManagerService } from '../../../services/shared/dialog-manager.service';
+import { ProfileStore } from '../../../stores/profile/profile.store';
 import { PROFILE_DIALOG_ID } from '../profile-dialog/profile-dialog.name';
 
 @Component({

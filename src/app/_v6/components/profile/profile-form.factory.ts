@@ -4,7 +4,7 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { UserProfile } from '../../models/profile.model';
+import { UserProfile } from '../../models/profile/profile.model';
 
 export interface ProfileFormFields {
   name: FormControl<string>;

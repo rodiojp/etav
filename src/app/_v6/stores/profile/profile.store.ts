@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { UserProfile } from '../models/profile.model';
-import { ProfileService } from '../services/profile.service';
-import { ProfileProcessingService } from '../services/profile-processing.service';
+import { UserProfile } from '../../models/profile/profile.model';
+import { ProfileService } from '../../services/profile/profile.service';
+import { ProfileProcessingService } from '../../services/profile/profile-processing.service';
 import { Observable } from 'rxjs';
-import { BaseEntityStore } from './shared/base-entity.store';
+import { BaseEntityStore } from '../shared/base-entity.store';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileStore extends BaseEntityStore<UserProfile> {
@@ -18,7 +18,9 @@ export class ProfileStore extends BaseEntityStore<UserProfile> {
     return this.profileService.saveProfile(entity);
   }
 
-  protected override processEntity$(entity: UserProfile): Observable<UserProfile> {
+  protected override processEntity$(
+    entity: UserProfile
+  ): Observable<UserProfile> {
     return this.processingService.processProfile(entity);
   }
 }

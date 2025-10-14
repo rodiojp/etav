@@ -2,7 +2,7 @@ import { Component, Inject, inject } from '@angular/core';
 import { createProfileForm, ProfileFormType } from '../profile-form.factory';
 import { FormBuilder } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { UserProfile } from '../../../models/profile.model';
+import { UserProfile } from '../../../models/profile/profile.model';
 
 @Component({
   selector: 'app-profile-dialog',

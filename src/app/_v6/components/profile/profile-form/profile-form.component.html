@@ -6,11 +6,11 @@
     <span class="error-text">{{ stateSignal().error }}</span>
   </div>
 
-  <form [formGroup]="formProfile">
+  <form [formGroup]="form">
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Name</mat-label>
       <input matInput formControlName="name" placeholder="Enter your name" />
-      <mat-error *ngIf="formProfile.get('name')?.hasError('required')">
+      <mat-error *ngIf="form.get('name')?.hasError('required')">
         Name is required
       </mat-error>
     </mat-form-field>
@@ -23,10 +23,10 @@
         formControlName="email"
         placeholder="Enter your email"
       />
-      <mat-error *ngIf="formProfile.get('email')?.hasError('required')">
+      <mat-error *ngIf="form.get('email')?.hasError('required')">
         Email is required
       </mat-error>
-      <mat-error *ngIf="formProfile.get('email')?.hasError('email')">
+      <mat-error *ngIf="form.get('email')?.hasError('email')">
         Please enter a valid email address
       </mat-error>
     </mat-form-field>

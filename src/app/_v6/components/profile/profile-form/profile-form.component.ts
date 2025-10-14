@@ -7,17 +7,17 @@ import {
   inject,
 } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
-import { ProfileStore } from '../../stores/profile.store';
-import { UserProfile } from '../../models/profile.model';
+import { ProfileStore } from '../../../stores/profile/profile.store';
+import { UserProfile } from '../../../models/profile/profile.model';
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
-import { createProfileForm, ProfileFormType } from './profile-form.factory';
+import { createProfileForm, ProfileFormType } from '../profile-form.factory';
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.scss'],
+  selector: 'app-profile-form',
+  templateUrl: './profile-form.component.html',
+  styleUrls: ['./profile-form.component.scss'],
 })
-export class ProfileComponent {
+export class ProfileFormComponent {
   private readonly store = inject(ProfileStore);
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
@@ -35,7 +35,7 @@ export class ProfileComponent {
     error: state.error,
   }));
 
-  readonly formProfile: ProfileFormType = createProfileForm(this.fb);
+  readonly form: ProfileFormType = createProfileForm(this.fb);
 
   private lastProfileRef: UserProfile | null = null;
 
@@ -52,21 +52,21 @@ export class ProfileComponent {
 
     // Disable/enable form based on loading
     if (loading) {
-      this.formProfile.disable({ emitEvent: false });
+      this.form.disable({ emitEvent: false });
     } else {
-      this.formProfile.enable({ emitEvent: false });
+      this.form.enable({ emitEvent: false });
     }
 
     // Only patch form when profile changes (avoid re-patching during save)
     if (profile && !loading) {
-      const current = this.formProfile.getRawValue();
+      const current = this.form.getRawValue();
       const changed =
         current.name !== profile.name ||
         current.email !== profile.email ||
         current.role !== profile.role;
 
       if (changed) {
-        this.formProfile.patchValue(profile, { emitEvent: false });
+        this.form.patchValue(profile, { emitEvent: false });
       }
     }
   });
@@ -74,23 +74,20 @@ export class ProfileComponent {
   readonly canSave = computed(() => {
     const state = this.stateSignal();
     return (
-      this.formProfile.valid &&
-      state.saveable &&
-      !state.loading &&
-      !state.processing
+      this.form.valid && state.saveable && !state.loading && !state.processing
     );
   });
 
   readonly canProcess = computed(() => {
     const state = this.stateSignal();
-    return this.formProfile.valid && !state.loading && !state.processing;
+    return this.form.valid && !state.loading && !state.processing;
   });
 
   constructor() {
     this.store.loadEntity();
 
     // Track form changes to know if Save should be enabled
-    this.formProfile.valueChanges.subscribe((formValue) => {
+    this.form.valueChanges.subscribe((formValue) => {
       this.store.updateSaveable(formValue as UserProfile);
     });
 
@@ -100,30 +97,30 @@ export class ProfileComponent {
   }
 
   onSave() {
-    if (this.formProfile.valid) {
+    if (this.form.valid) {
       const viewModel = this.profileStateSignal();
       const profile: UserProfile = {
         ...viewModel.profile!,
-        ...this.formProfile.getRawValue(),
+        ...this.form.getRawValue(),
       };
       console.log('Saving profile', profile);
       this.store.saveEntity(profile);
     } else {
-      this.formProfile.markAllAsTouched();
+      this.form.markAllAsTouched();
     }
   }
 
   onProcess() {
-    if (this.formProfile.valid) {
+    if (this.form.valid) {
       const viewModel = this.profileStateSignal();
       const profile: UserProfile = {
         ...viewModel.profile!,
-        ...this.formProfile.getRawValue(),
+        ...this.form.getRawValue(),
       };
       console.log('Processing profile', profile);
       this.store.processEntity(profile);
     } else {
-      this.formProfile.markAllAsTouched();
+      this.form.markAllAsTouched();
     }
   }
 }

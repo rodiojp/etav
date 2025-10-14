@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { ProfileRepository } from '../repositories/profile.repository';
-import { UserProfile } from '../models/profile.model';
+import { ProfileRepository } from '../../repositories/profile/profile.repository';
+import { UserProfile } from '../../models/profile/profile.model';
 import { Observable } from 'rxjs';
 
 @Injectable({

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { delay, map, mergeMap, Observable, of, throwError, timer } from 'rxjs';
-import { UserProfile } from '../models/profile.model';
+import { UserProfile } from '../../models/profile/profile.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileRepository {

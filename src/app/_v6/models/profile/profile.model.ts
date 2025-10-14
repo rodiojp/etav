@@ -1,4 +1,4 @@
-import { EntityState } from './shared/entity-state.model';
+import { EntityState } from '../shared/entity-state.model';
 
 export interface UserProfile {
   id: string;
