@@ -1,3 +1,5 @@
+import { EntityState } from './shared/entity-state.model';
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -5,18 +7,4 @@ export interface UserProfile {
   role: string | null;
 }
 
-export interface ProfileState {
-  profile: UserProfile | null;
-  loading: boolean;
-  processing: boolean;
-  saveable: boolean;
-  error: string | null;
-}
-
-export const initialProfileState: ProfileState = {
-  profile: null,
-  loading: false,
-  processing: false,
-  saveable: false,
-  error: null,
-};
+export type ProfileState = EntityState<UserProfile>;

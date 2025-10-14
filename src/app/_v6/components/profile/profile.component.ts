@@ -24,7 +24,7 @@ export class ProfileComponent {
   readonly faExclamationTriangle = faExclamationTriangle;
 
   readonly profileStateSignal = this.store.selectSignal((state) => ({
-    profile: state.profile,
+    profile: state.entity,
   }));
 
   readonly stateSignal = this.store.selectSignal((state) => ({
@@ -55,7 +55,7 @@ export class ProfileComponent {
     const { profile } = this.profileStateSignal();
     const { loading } = this.stateSignal(); // separate reactive dependency
     console.log('VM changed:', { profile, loading });
-    
+
     // Only react if the actual profile object instance changes
     if (profile === this.lastProfileRef) return;
 
@@ -98,7 +98,7 @@ export class ProfileComponent {
   });
 
   constructor() {
-    this.store.loadProfile();
+    this.store.loadEntity();
 
     // Track form changes to know if Save should be enabled
     this.formProfile.valueChanges.subscribe((formValue) => {
@@ -118,7 +118,7 @@ export class ProfileComponent {
         ...this.formProfile.getRawValue(),
       };
       console.log('Saving profile', profile);
-      this.store.updateProfile(profile);
+      this.store.saveEntity(profile);
     } else {
       this.formProfile.markAllAsTouched();
     }
@@ -132,7 +132,7 @@ export class ProfileComponent {
         ...this.formProfile.getRawValue(),
       };
       console.log('Processing profile', profile);
-      this.store.processProfile(profile);
+      this.store.processEntity(profile);
     } else {
       this.formProfile.markAllAsTouched();
     }
