@@ -9,9 +9,18 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { BaseDialogComponent } from './components/dialog-one/base-dialog/base-dialog.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { ProfileDialogTemplatesComponent } from './components/dialog-one/profile-dialog-templates/profile-dialog-templates.component';
+import { TestDialogComponent } from './components/dialog-one/test-dialog/test-dialog.component';
 
 @NgModule({
-  declarations: [ProfileComponent],
+  declarations: [
+    ProfileComponent,
+    BaseDialogComponent,
+    ProfileDialogTemplatesComponent,
+    TestDialogComponent,
+  ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -21,8 +30,10 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     MatInputModule,
     BrowserAnimationsModule,
     MatButtonModule,
-    FontAwesomeModule
+    MatDialogModule,
+    MatInputModule,
+    FontAwesomeModule,
   ],
-  exports: [ProfileComponent],
+  exports: [ProfileComponent, TestDialogComponent],
 })
 export class V6Module {}

@@ -1,22 +1,41 @@
 import {
+  AfterViewInit,
   Component,
   computed,
   DestroyRef,
   effect,
   EffectRef,
   inject,
+  TemplateRef,
+  ViewChild,
 } from '@angular/core';
+import { UserProfile } from '../../../models/profile.model';
+import { ProfileStore } from '../../../stores/profile.store';
 import { FormBuilder, Validators } from '@angular/forms';
-import { ProfileStore } from '../../stores/profile.store';
-import { UserProfile } from '../../models/profile.model';
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { SharedDialogTemplatesService } from '../../../services/dialog-one/shared-dialog-templates.service';
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.scss'],
+  selector: 'app-profile-dialog-templates',
+  templateUrl: './profile-dialog-templates.component.html',
 })
-export class ProfileComponent {
+export class ProfileDialogTemplatesComponent implements AfterViewInit {
+  // -- templates for BaseDialog component via SharedService ----
+  @ViewChild('header') header!: TemplateRef<any>;
+  @ViewChild('content') content!: TemplateRef<any>;
+  @ViewChild('actions') actions!: TemplateRef<any>;
+
+  private readonly sharedService = inject(SharedDialogTemplatesService);
+
+  ngAfterViewInit(): void {
+    this.sharedService.updateProfileTemplates({
+      header: this.header,
+      content: this.content,
+      actions: this.actions,
+    });
+  }
+  // -------------------------------------------------------------
+
   private readonly store = inject(ProfileStore);
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);

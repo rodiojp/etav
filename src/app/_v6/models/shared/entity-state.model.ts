@@ -1,4 +1,4 @@
-import { UiState } from './ui-state.model';
+import { UiState } from '../shared/ui-state.model';
 
 export interface EntityState<T> extends UiState {
   entity: T | null;
