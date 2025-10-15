@@ -1,8 +1,7 @@
 import { Component, inject } from '@angular/core';
-import { ProfileDialogComponent } from '../profile-dialog/profile-dialog.component';
 import { DialogManagerService } from '../../../services/shared/dialog-manager.service';
-import { ProfileStore } from '../../../stores/profile/profile.store';
 import { PROFILE_DIALOG_ID } from '../profile-dialog/profile-dialog.name';
+import { ProfileFormComponent } from '../profile-form/profile-form.component';
 
 @Component({
   selector: 'app-dialog-content-example',
@@ -10,37 +9,16 @@ import { PROFILE_DIALOG_ID } from '../profile-dialog/profile-dialog.name';
   styleUrl: './dialog-content-example.component.scss',
 })
 export class DialogContentExampleComponent {
-  private readonly store = inject(ProfileStore);
-
   private readonly dialogs = inject(DialogManagerService);
-  readonly profileStateSignal = this.store.selectSignal((state) => ({
-    profile: state.entity,
-  }));
 
   async openProfileDialog() {
-    const { profile } = this.profileStateSignal();
-    if (!profile) return;
-
-    const config = {
+    this.dialogs.open({
       id: PROFILE_DIALOG_ID,
-      component: ProfileDialogComponent,
-      data: profile,
+      component: ProfileFormComponent,
       width: '500px',
+      data: null,
       height: null,
-      panelClass: 'profile-dialog-panel',
-    };
-
-    // Open using DialogManagerService
-    const { result } = this.dialogs.open(config);
-
-    // Wait for dialog result
-    const updatedProfile = await result;
-    if (updatedProfile) {
-      console.log('Dialog returned updated profile:', updatedProfile);
-
-      // update store
-      this.store.saveEntity(updatedProfile);
-      this.store.updateSaveable(updatedProfile);
-    }
+      panelClass: null,
+    });
   }
 }
