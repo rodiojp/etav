@@ -1,12 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { ProfileDialogComponent } from '../profile-dialog/profile-dialog.component';
-import {
-  DialogManagerService,
-} from '../../../services/shared/dialog-manager.service';
+import { DialogManagerService } from '../../../services/shared/dialog-manager.service';
 import { ProfileStore } from '../../../stores/profile/profile.store';
-import {
-  profileDialogConfigFactory,
-} from '../profile-dialog/profile-dialog.config';
+import { profileDialogConfigFactory } from '../profile-dialog/profile-dialog.config';
+import { ProfileFormComponent } from '../profile-form/profile-form.component';
+import { profileFormConfigFactory } from '../profile-form/profile-form.config';
 import { UserProfile } from '../../../models/profile/profile.model';
 
 @Component({
@@ -45,6 +43,25 @@ export class DialogContentExampleComponent {
     if (updatedProfile) {
       console.log('Dialog returned updated profile:', updatedProfile);
 
+      // update store
+      this.store.saveEntity(updatedProfile);
+      this.store.updateSaveable(updatedProfile);
+    }
+  }
+
+  async openProfileForm() {
+    let profile = null;
+    const config = profileFormConfigFactory(profile);
+    // Open using DialogManagerService
+    const { result } = this.dialogs.open<
+      ProfileFormComponent,
+      UserProfile,
+      UserProfile
+    >(config);
+    // Wait for dialog result
+    const updatedProfile = await result;
+    if (updatedProfile) {
+      console.log('Dialog returned updated profile:', updatedProfile);
       // update store
       this.store.saveEntity(updatedProfile);
       this.store.updateSaveable(updatedProfile);
