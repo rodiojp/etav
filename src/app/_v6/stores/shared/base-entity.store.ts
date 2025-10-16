@@ -1,76 +1,109 @@
-import { ComponentStore } from '@ngrx/component-store';
-import { catchError, finalize, of, switchMap, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  catchError,
+  finalize,
+  of,
+  tap,
+} from 'rxjs';
 import {
   EntityState,
   initialEntityState,
 } from '../../models/shared/entity-state.model';
 
-export abstract class BaseEntityStore<T> extends ComponentStore<
-  EntityState<T>
-> {
-  constructor() {
-    super(initialEntityState);
+/**
+ * A lightweight reactive store using RxJS instead of ComponentStore.
+ * Handles loading, saving, and processing entities with reactive state updates.
+ */
+export abstract class BaseEntityStore<T> {
+  private readonly stateSubject = new BehaviorSubject<EntityState<T>>(
+    initialEntityState
+  );
+  readonly state$ = this.stateSubject.asObservable();
+
+  /** Shortcut accessors */
+  get state(): EntityState<T> {
+    return this.stateSubject.value;
   }
 
-  protected abstract loadEntity$(): any;
-  protected abstract saveEntity$(entity: T): any;
-  protected abstract processEntity$(entity: T): any;
+  protected setState(partial: Partial<EntityState<T>>) {
+    const current = this.stateSubject.value;
+    const next = { ...current, ...partial };
 
-  readonly loadEntity = this.effect<void>((trigger$) =>
-    trigger$.pipe(
-      tap(() => this.patchState({ loading: true, error: null })),
-      switchMap(() =>
-        this.loadEntity$().pipe(
-          tap((entity: T) => this.patchState({ entity })),
-          catchError((err) => {
-            this.patchState({ error: err.message });
-            return of(null);
-          }),
-          finalize(() => this.patchState({ loading: false, processing: false }))
-        )
+    // Only emit if something actually changed
+    if (!this.shallowEqual(current, next)) {
+      this.stateSubject.next(next);
+    }
+  }
+
+  protected abstract loadEntity$(): Observable<T>;
+  protected abstract saveEntity$(entity: T): Observable<T>;
+  protected abstract processEntity$(entity: T): Observable<T>;
+
+  /** Loads entity and updates state reactively */
+  loadEntity(): void {
+    this.setState({ loading: true, error: null });
+
+    this.loadEntity$()
+      .pipe(
+        tap((entity: T) => this.setState({ entity })),
+        catchError((err) => {
+          this.setState({ error: err.message });
+          return of(null);
+        }),
+        finalize(() => this.setState({ loading: false, processing: false }))
       )
-    )
-  );
+      .subscribe();
+  }
 
-  readonly saveEntity = this.effect<T>((entity$) =>
-    entity$.pipe(
-      tap(() => this.patchState({ loading: true, error: null })),
-      switchMap((entity) =>
-        this.saveEntity$(entity).pipe(
-          tap((updated: T) =>
-            this.patchState({ entity: updated, saveable: false })
-          ),
-          catchError((err) => {
-            this.patchState({ error: err.message });
-            return of(null);
-          }),
-          finalize(() => this.patchState({ loading: false }))
-        )
+  /** Saves entity and updates state */
+  saveEntity(entity: T): void {
+    this.setState({ loading: true, error: null });
+
+    this.saveEntity$(entity)
+      .pipe(
+        tap((updated: T) =>
+          this.setState({ entity: updated, saveable: false })
+        ),
+        catchError((err) => {
+          this.setState({ error: err.message });
+          return of(null);
+        }),
+        finalize(() => this.setState({ loading: false }))
       )
-    )
-  );
+      .subscribe();
+  }
 
-  readonly processEntity = this.effect<T>((entity$) =>
-    entity$.pipe(
-      tap(() => this.patchState({ processing: true, error: null })),
-      switchMap((entity) =>
-        this.processEntity$(entity).pipe(
-          tap((processed: T) =>
-            this.patchState({ entity: processed, saveable: true })
-          ),
-          catchError((err) => {
-            this.patchState({ error: err.message });
-            return of(null);
-          }),
-          finalize(() => this.patchState({ processing: false }))
-        )
+  /** Processes entity and marks saveable */
+  processEntity(entity: T): void {
+    this.setState({ processing: true, error: null });
+
+    this.processEntity$(entity)
+      .pipe(
+        tap((processed: T) =>
+          this.setState({ entity: processed, saveable: true })
+        ),
+        catchError((err) => {
+          this.setState({ error: err.message });
+          return of(null);
+        }),
+        finalize(() => this.setState({ processing: false }))
       )
-    )
-  );
+      .subscribe();
+  }
 
-  readonly updateSaveable = this.updater<T>((state, currentValue) => {
+  /** Updates saveable flag based on comparison */
+  updateSaveable(currentValue: T): void {
     const changed =
-      JSON.stringify(state.entity) !== JSON.stringify(currentValue);
-    return { ...state, saveable: changed };
-  });
+      JSON.stringify(this.state.entity) !== JSON.stringify(currentValue);
+    this.setState({ saveable: changed });
+  }
+
+  private shallowEqual(a: any, b: any): boolean {
+    if (a === b) return true;
+    const aKeys = Object.keys(a);
+    const bKeys = Object.keys(b);
+    if (aKeys.length !== bKeys.length) return false;
+    return aKeys.every((key) => a[key] === b[key]);
+  }
 }

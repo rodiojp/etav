@@ -1,9 +1,19 @@
-<div class="profile-container" *ngIf="profileStateSignal().profile as profile">
+<div
+  class="profile-container"
+  *ngIf="profileSignal() as profile; else loadingTemplate"
+>
   <h2>User Profile</h2>
 
-  <div *ngIf="stateSignal().error" class="error-banner">
-    <span class="error-icon"><fa-icon [icon]="faExclamationTriangle" /></span>
-    <span class="error-text">{{ stateSignal().error }}</span>
+  <!-- Error banner -->
+  <div
+    *ngIf="errorSignal() as error"
+    class="error-banner"
+    [class.visible]="!!error"
+  >
+    <span class="error-icon">
+      <fa-icon [icon]="faExclamationTriangle"></fa-icon>
+    </span>
+    <span class="error-text">{{ error }}</span>
   </div>
 
   <form [formGroup]="form">
@@ -38,10 +48,11 @@
 
     <div class="actions">
       <mat-progress-spinner
-        *ngIf="stateSignal().loading || stateSignal().processing"
+        *ngIf="loadingSignal() || processingSignal()"
         diameter="20"
         mode="indeterminate"
       ></mat-progress-spinner>
+
       <button
         mat-flat-button
         color="warn"
@@ -50,6 +61,7 @@
       >
         Process
       </button>
+
       <button
         mat-flat-button
         color="primary"
@@ -61,3 +73,14 @@
     </div>
   </form>
 </div>
+
+<!-- Loading placeholder -->
+<ng-template #loadingTemplate>
+  <div class="loading-placeholder">
+    <mat-progress-spinner
+      diameter="40"
+      mode="indeterminate"
+    ></mat-progress-spinner>
+    <span>Loading profile...</span>
+  </div>
+</ng-template>

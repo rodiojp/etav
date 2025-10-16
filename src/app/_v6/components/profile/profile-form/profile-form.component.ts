@@ -1,12 +1,8 @@
-import {
-  Component,
-  computed,
-  DestroyRef,
-  effect,
-  EffectRef,
-  inject,
-} from '@angular/core';
+import { Component, inject, computed, DestroyRef } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { map, distinctUntilChanged } from 'rxjs';
 import { ProfileStore } from '../../../stores/profile/profile.store';
 import { UserProfile } from '../../../models/profile/profile.model';
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
@@ -23,53 +19,18 @@ export class ProfileFormComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly faExclamationTriangle = faExclamationTriangle;
-
-  readonly profileStateSignal = this.store.selectSignal((state) => ({
-    profile: state.entity,
-  }));
-
-  readonly stateSignal = this.store.selectSignal((state) => ({
-    loading: state.loading,
-    processing: state.processing,
-    saveable: state.saveable,
-    error: state.error,
-  }));
-
   readonly form: ProfileFormType = createProfileForm(this.fb);
 
-  private lastProfileRef: UserProfile | null = null;
-
-  // Effect defined as a class field, within the injection context
-  private readonly syncFormWithVm: EffectRef = effect(() => {
-    const { profile } = this.profileStateSignal();
-    const { loading } = this.stateSignal(); // separate reactive dependency
-    console.log('VM changed:', { profile, loading });
-
-    // Only react if the actual profile object instance changes
-    if (profile === this.lastProfileRef) return;
-
-    this.lastProfileRef = profile;
-
-    // Disable/enable form based on loading
-    if (loading) {
-      this.form.disable({ emitEvent: false });
-    } else {
-      this.form.enable({ emitEvent: false });
-    }
-
-    // Only patch form when profile changes (avoid re-patching during save)
-    if (profile && !loading) {
-      const current = this.form.getRawValue();
-      const changed =
-        current.name !== profile.name ||
-        current.email !== profile.email ||
-        current.role !== profile.role;
-
-      if (changed) {
-        this.form.patchValue(profile, { emitEvent: false });
-      }
-    }
+  // Convert store state$ (BehaviorSubject) → signal for easy template binding
+  readonly stateSignal = toSignal(this.store.state$, {
+    initialValue: this.store.state,
   });
+
+  readonly profileSignal = computed(() => this.stateSignal().entity);
+  readonly loadingSignal = computed(() => this.stateSignal().loading);
+  readonly processingSignal = computed(() => this.stateSignal().processing);
+  readonly saveableSignal = computed(() => this.stateSignal().saveable);
+  readonly errorSignal = computed(() => this.stateSignal().error);
 
   readonly canSave = computed(() => {
     const state = this.stateSignal();
@@ -84,25 +45,64 @@ export class ProfileFormComponent {
   });
 
   constructor() {
+    // Load profile initially
     this.store.loadEntity();
 
-    // Track form changes to know if Save should be enabled
-    this.form.valueChanges.subscribe((formValue) => {
-      this.store.updateSaveable(formValue as UserProfile);
-    });
+    // Sync form with store changes reactively
+    this.store.state$
+      .pipe(
+        map((s) => ({
+          profile: s.entity,
+          loading: s.loading,
+          processing: s.processing,
+        })),
+        distinctUntilChanged(
+          (prev, curr) =>
+            prev.profile === curr.profile &&
+            prev.loading === curr.loading &&
+            prev.processing === curr.processing
+        ),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(({ profile, loading, processing }) => {
+        // Handle form enable/disable cleanly
+        const shouldDisable = loading || processing;
+        if (shouldDisable && this.form.enabled) {
+          this.form.disable({ emitEvent: false });
+        } else if (!shouldDisable && this.form.disabled) {
+          this.form.enable({ emitEvent: false });
+        }
 
-    this.destroyRef.onDestroy(() => {
-      this.syncFormWithVm.destroy();
-    });
+        // Only patch when entity really changed
+        if (profile && !shouldDisable) {
+          const current = this.form.getRawValue();
+
+          // Compare only top-level fields we care about
+          const changed =
+            current.name !== profile.name ||
+            current.email !== profile.email ||
+            current.role !== profile.role;
+
+          if (changed) {
+            this.form.patchValue(profile, { emitEvent: false });
+          }
+        }
+      });
+
+    // Watch form changes to determine if Save should be enabled
+    this.form.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((formValue) => {
+        this.store.updateSaveable(formValue as UserProfile);
+      });
   }
 
   onSave() {
     if (this.form.valid) {
-      const viewModel = this.profileStateSignal();
-      const profile: UserProfile = {
-        ...viewModel.profile!,
+      const profile = {
+        ...this.profileSignal(),
         ...this.form.getRawValue(),
-      };
+      } as UserProfile;
       console.log('Saving profile', profile);
       this.store.saveEntity(profile);
     } else {
@@ -112,11 +112,10 @@ export class ProfileFormComponent {
 
   onProcess() {
     if (this.form.valid) {
-      const viewModel = this.profileStateSignal();
-      const profile: UserProfile = {
-        ...viewModel.profile!,
+      const profile = {
+        ...this.profileSignal(),
         ...this.form.getRawValue(),
-      };
+      } as UserProfile;
       console.log('Processing profile', profile);
       this.store.processEntity(profile);
     } else {
