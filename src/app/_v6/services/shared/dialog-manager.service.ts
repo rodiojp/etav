@@ -2,10 +2,15 @@ import { inject, Injectable } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 
-export interface DialogOptions<TData = any> {
+export interface DialogComponentData<TData, TResult> {
+  input: TData | null;
+  output: TResult | null;
+}
+
+export interface DialogOptions<DialogComponentData> {
   id: string;
   component: any;
-  data: TData | null;
+  data: DialogComponentData;
   width: string | null;
   height: string | null;
   panelClass: string | string[] | null;
@@ -26,18 +31,19 @@ export class DialogManagerService {
 
   /** Open dialog and return the id + result promise */
   open<TComponent, TResult = any, TData = any>(
-    options: DialogOptions<TData>
+    options: DialogOptions<DialogComponentData<TData, TResult>>
   ): { id: string; result: Promise<TResult | null> } {
-    const ref = this.matDialog.open<TComponent, TData, TResult>(
-      options.component,
-      {
-        width: options.width ?? '480px',
-        height: options.height ?? undefined,
-        data: options.data,
-        panelClass: options.panelClass ?? undefined,
-        disableClose: false,
-      }
-    );
+    const ref = this.matDialog.open<
+      TComponent,
+      DialogComponentData<TData, TResult>,
+      TResult
+    >(options.component, {
+      width: options.width ?? '480px',
+      height: options.height ?? undefined,
+      data: options.data,
+      panelClass: options.panelClass ?? undefined,
+      disableClose: false,
+    });
 
     this.dialogs.set(options.id, {
       id: options.id,
