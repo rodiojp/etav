@@ -1,4 +1,21 @@
-<button mat-button (click)="openProfileDialog()">Open Dialog</button>
-<button mat-button color="primary" (click)="openProfileForm()">
-  Open Form
-</button>
+<div>
+  <button mat-button (click)="openProfileDialog()">Open Dialog</button>
+  <button mat-button color="primary" (click)="openProfileForm()">
+    Open Form
+  </button>
+  <button mat-button color="accent" (click)="openVolumeOverlay()">
+    Open Volume Overlay
+  </button>
+</div>
+<div>
+  <button
+    mat-button
+    color="warn"
+    (click)="openProfileFormThenOpenVolumeOverlay()"
+  >
+    Open Form Then Overlay
+  </button>
+  <button mat-button color="secondary" (click)="openVolumeOverlayThenCloseIt()">
+    Open Overlay Then Close After 5 Seconds
+  </button>
+</div>

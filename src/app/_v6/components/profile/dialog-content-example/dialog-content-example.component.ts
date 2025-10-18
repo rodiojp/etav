@@ -6,6 +6,8 @@ import { profileDialogConfigFactory } from '../profile-dialog/profile-dialog.con
 import { ProfileFormComponent } from '../profile-form/profile-form.component';
 import { profileFormConfigFactory } from '../profile-form/profile-form.config';
 import { UserProfile } from '../../../models/profile/profile.model';
+import { volumeOverlayConfigFactory } from '../../volume-overlay/volume-overlay.config';
+import { VolumeOverlayComponent } from '../../volume-overlay/volume-overlay.component';
 
 @Component({
   selector: 'app-dialog-content-example',
@@ -17,6 +19,10 @@ export class DialogContentExampleComponent {
 
   private readonly dialogs = inject(DialogManagerService);
 
+  /**
+   * Open Profile Dialog
+   * Handles both creating new profile and editing existing one
+   */
   async openProfileDialog() {
     let profile = null;
     if (Math.random() < 0.5) {
@@ -45,26 +51,50 @@ export class DialogContentExampleComponent {
 
       // update store
       this.store.saveEntity(updatedProfile);
-      this.store.updateSaveable(updatedProfile);
     }
   }
 
+  /**
+   * Open Profile Form Dialog
+   * ignore the returned result for this example
+   */
   async openProfileForm() {
-    let profile = null;
-    const config = profileFormConfigFactory(profile);
+    const config = profileFormConfigFactory();
     // Open using DialogManagerService
-    const { result } = this.dialogs.open<
-      ProfileFormComponent,
-      UserProfile,
-      UserProfile
-    >(config);
-    // Wait for dialog result
-    const updatedProfile = await result;
-    if (updatedProfile) {
-      console.log('Dialog returned updated profile:', updatedProfile);
-      // update store
-      this.store.saveEntity(updatedProfile);
-      this.store.updateSaveable(updatedProfile);
-    }
+    this.dialogs.open<ProfileFormComponent>(config);
+  }
+
+  /**
+   * Open Volume Overlay Dialog
+   * ignore the returned result for this example
+   */
+  async openVolumeOverlay() {
+    const config = volumeOverlayConfigFactory();
+    this.dialogs.open<VolumeOverlayComponent>(config);
+  }
+
+  /**
+   * Open Profile Form, then after 5 seconds open Volume Overlay
+   */
+  async openProfileFormThenOpenVolumeOverlay() {
+    await this.openProfileForm();
+    setTimeout(() => {
+      this.openVolumeOverlay();
+    }, 5000);
+  }
+
+  /**
+   * Open Volume Overlay, then close it after 5 seconds
+   * ignores the returned result for this example
+   */
+  async openVolumeOverlayThenCloseIt() {
+    const { id } = this.dialogs.open<VolumeOverlayComponent>(
+      volumeOverlayConfigFactory()
+    );
+    console.log('Opened Volume Overlay with id:', id);
+    setTimeout(() => {
+      this.dialogs.close(id);
+      console.log('Closed Volume Overlay with id:', id);
+    }, 5000);
   }
 }

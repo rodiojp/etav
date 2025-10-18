@@ -4,14 +4,13 @@ import { ProfileFormComponent } from './profile-form.component';
 
 export const PROFILE_FORM_ID = 'profile-form';
 
-export const profileFormConfigFactory = (input: UserProfile | null) => {
+export const profileFormConfigFactory = (input: UserProfile | null = null) => {
   return DialogConfigFactory.createConfig<
+    ProfileFormComponent,
     UserProfile,
-    UserProfile,
-    ProfileFormComponent
+    UserProfile
   >(PROFILE_FORM_ID, ProfileFormComponent, input, {
     width: '600px',
     height: '500px',
-    panelClass: 'profile-dialog-panel',
   });
 };

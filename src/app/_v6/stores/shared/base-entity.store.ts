@@ -21,7 +21,9 @@ export abstract class BaseEntityStore<T> {
   );
   readonly state$ = this.stateSubject.asObservable();
 
-  /** Shortcut accessors */
+  /**
+   * Shortcut accessors
+   */
   get state(): EntityState<T> {
     return this.stateSubject.value;
   }
@@ -40,7 +42,9 @@ export abstract class BaseEntityStore<T> {
   protected abstract saveEntity$(entity: T): Observable<T>;
   protected abstract processEntity$(entity: T): Observable<T>;
 
-  /** Loads entity and updates state reactively */
+  /**
+   * Loads entity and updates state reactively
+   */
   loadEntity(): void {
     this.setState({ loading: true, error: null });
 
@@ -56,7 +60,9 @@ export abstract class BaseEntityStore<T> {
       .subscribe();
   }
 
-  /** Saves entity and updates state */
+  /**
+   * Saves entity and updates state
+   */
   saveEntity(entity: T): void {
     this.setState({ loading: true, error: null });
 
@@ -74,7 +80,9 @@ export abstract class BaseEntityStore<T> {
       .subscribe();
   }
 
-  /** Processes entity and marks saveable */
+  /**
+   * Processes entity and marks saveable
+   */
   processEntity(entity: T): void {
     this.setState({ processing: true, error: null });
 
@@ -92,7 +100,9 @@ export abstract class BaseEntityStore<T> {
       .subscribe();
   }
 
-  /** Updates saveable flag based on comparison */
+  /**
+   * Updates saveable flag based on comparison
+   */
   updateSaveable(currentValue: T): void {
     const changed =
       JSON.stringify(this.state.entity) !== JSON.stringify(currentValue);

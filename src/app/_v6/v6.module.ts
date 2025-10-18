@@ -12,12 +12,14 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatDialogModule } from '@angular/material/dialog';
 import { DialogContentExampleComponent } from './components/profile/dialog-content-example/dialog-content-example.component';
 import { ProfileDialogComponent } from './components/profile/profile-dialog/profile-dialog.component';
+import { VolumeOverlayComponent } from './components/volume-overlay/volume-overlay.component';
 
 @NgModule({
   declarations: [
     ProfileFormComponent,
     DialogContentExampleComponent,
     ProfileDialogComponent,
+    VolumeOverlayComponent,
   ],
   imports: [
     CommonModule,
