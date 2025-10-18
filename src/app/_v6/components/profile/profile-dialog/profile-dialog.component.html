@@ -1,5 +1,7 @@
-<h2 mat-dialog-title>{{ title }}</h2>
-
+<div mat-dialog-title class="dialog-title">
+  <h2>{{ title }}</h2>
+  <fa-icon [icon]="faTimes" (click)="onCancel()" class="close"></fa-icon>
+</div>
 <mat-dialog-content>
   <form [formGroup]="form">
     <mat-form-field appearance="outline" class="full-width">
