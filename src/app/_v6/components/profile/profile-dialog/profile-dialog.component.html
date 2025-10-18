@@ -3,7 +3,7 @@
   <fa-icon [icon]="faTimes" (click)="onCancel()" class="close"></fa-icon>
 </div>
 <mat-dialog-content>
-  <form [formGroup]="form">
+  <form [formGroup]="form" class="profile-form">
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Name</mat-label>
       <input matInput formControlName="name" />

@@ -11,6 +11,7 @@ export const volumeOverlayConfigFactory = () => {
     {
       width: '500px',
       height: '200px',
+      disableClose: true,
     }
   );
 };

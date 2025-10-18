@@ -11,5 +11,6 @@ export const profileDialogConfigFactory = (input: UserProfile | null) => {
     UserProfile
   >(PROFILE_DIALOG_ID, ProfileDialogComponent, input, {
     width: '500px',
+    disableClose: true,
   });
 };
