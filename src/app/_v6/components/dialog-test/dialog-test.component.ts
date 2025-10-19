@@ -1,20 +1,20 @@
 import { Component, inject } from '@angular/core';
-import { ProfileDialogComponent } from '../profile-dialog/profile-dialog.component';
-import { DialogManagerService } from '../../../services/shared/dialog-manager.service';
-import { ProfileStore } from '../../../stores/profile/profile.store';
-import { profileDialogConfigFactory } from '../profile-dialog/profile-dialog.config';
-import { ProfileFormComponent } from '../profile-form/profile-form.component';
-import { profileFormConfigFactory } from '../profile-form/profile-form.config';
-import { UserProfile } from '../../../models/profile/profile.model';
-import { volumeOverlayConfigFactory } from '../../volume-overlay/volume-overlay.config';
-import { VolumeOverlayComponent } from '../../volume-overlay/volume-overlay.component';
+import { ProfileDialogComponent } from '../profile/profile-dialog/profile-dialog.component';
+import { DialogManagerService } from '../../services/shared/dialog-manager.service';
+import { ProfileStore } from '../../stores/profile/profile.store';
+import { profileDialogConfigFactory } from '../profile/profile-dialog/profile-dialog.config';
+import { ProfileFormComponent } from '../profile/profile-form/profile-form.component';
+import { profileFormConfigFactory } from '../profile/profile-form/profile-form.config';
+import { UserProfile } from '../../models/profile/profile.model';
+import { volumeOverlayConfigFactory } from '../volume-overlay/volume-overlay.config';
+import { VolumeOverlayComponent } from '../volume-overlay/volume-overlay.component';
 
 @Component({
-  selector: 'app-dialog-content-example',
-  templateUrl: './dialog-content-example.component.html',
-  styleUrl: './dialog-content-example.component.scss',
+  selector: 'app-dialog-test',
+  templateUrl: './dialog-test.component.html',
+  styleUrl: './dialog-test.component.scss',
 })
-export class DialogContentExampleComponent {
+export class DialogTestComponent {
   private readonly store = inject(ProfileStore);
 
   private readonly dialogs = inject(DialogManagerService);

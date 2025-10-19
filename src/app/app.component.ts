@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { V6Module } from './_v6/v6.module';
 
 @Component({
   selector: 'app-root',
@@ -8,5 +7,5 @@ import { V6Module } from './_v6/v6.module';
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  title = 'etav';
+  title = 'Etav Test Dialog';
 }

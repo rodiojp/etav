@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
-import { ProfileFormComponent } from './components/profile/profile-form/profile-form.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,14 +9,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatDialogModule } from '@angular/material/dialog';
-import { DialogContentExampleComponent } from './components/profile/dialog-content-example/dialog-content-example.component';
+import { DialogTestComponent } from './components/dialog-test/dialog-test.component';
 import { ProfileDialogComponent } from './components/profile/profile-dialog/profile-dialog.component';
+import { ProfileFormComponent } from './components/profile/profile-form/profile-form.component';
 import { VolumeOverlayComponent } from './components/volume-overlay/volume-overlay.component';
 
 @NgModule({
   declarations: [
     ProfileFormComponent,
-    DialogContentExampleComponent,
+    DialogTestComponent,
     ProfileDialogComponent,
     VolumeOverlayComponent,
   ],
@@ -34,6 +34,6 @@ import { VolumeOverlayComponent } from './components/volume-overlay/volume-overl
     MatInputModule,
     FontAwesomeModule,
   ],
-  exports: [ProfileFormComponent, DialogContentExampleComponent],
+  exports: [ProfileFormComponent, DialogTestComponent],
 })
 export class V6Module {}
