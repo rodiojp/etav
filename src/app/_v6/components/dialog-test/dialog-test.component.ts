@@ -97,4 +97,38 @@ export class DialogTestComponent {
       console.log('Closed Volume Overlay with id:', id);
     }, 5000);
   }
+
+  /**
+   * Open Multiple Volume Overlays
+   * ignores the returned result for this example
+   */
+  async openMultipleOverlays() {
+    this.openVolumeOverlay();
+    setTimeout(() => {
+      this.openVolumeOverlay();
+    }, 1000);
+    setTimeout(() => {
+      this.openVolumeOverlay();
+    }, 2000);
+  }
+
+  /**
+   * Open Profile Form, then after 2 seconds open Volume Overlay
+   */
+  async openProfileFormThenOverlay() {
+    await this.openProfileForm();
+    setTimeout(() => {
+      this.openVolumeOverlay();
+    }, 2000);
+  }
+
+  /**
+   * Open Volume Overlay, then after 2 seconds open Profile Form
+   */
+  async openOverlayThenForm() {
+    await this.openVolumeOverlay();
+    setTimeout(() => {
+      this.openProfileForm();
+    }, 2000);
+  }
 }

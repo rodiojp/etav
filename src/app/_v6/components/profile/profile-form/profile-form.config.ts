@@ -1,4 +1,5 @@
 import { UserProfile } from '../../../models/profile/profile.model';
+import { DialogType } from '../../../models/shared/dialog-type';
 import { DialogConfigFactory } from '../../../services/shared/dialog-config-factory';
 import { ProfileFormComponent } from './profile-form.component';
 
@@ -9,7 +10,7 @@ export const profileFormConfigFactory = (input: UserProfile | null = null) => {
     ProfileFormComponent,
     UserProfile,
     UserProfile
-  >(PROFILE_FORM_ID, ProfileFormComponent, input, {
+  >(PROFILE_FORM_ID, DialogType.MODAL, 1, ProfileFormComponent, input, {
     width: '600px',
     height: '500px',
   });
