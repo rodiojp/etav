@@ -1,9 +1,7 @@
 import { Type } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
-import {
-  DialogComponentData,
-  DialogConfiguration,
-} from './dialog-manager.service';
+import { DialogComponentData } from '../../models/shared/dialog-component-data';
+import { DialogConfiguration } from '../../models/shared/dialog-configuration';
 import { DialogType } from '../../models/shared/dialog-type';
 
 /**

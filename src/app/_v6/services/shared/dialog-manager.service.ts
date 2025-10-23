@@ -1,43 +1,10 @@
-import { ComponentType } from '@angular/cdk/portal';
 import { DestroyRef, inject, Injectable } from '@angular/core';
-import {
-  MatDialog,
-  MatDialogRef,
-  MatDialogConfig,
-} from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DialogType } from '../../models/shared/dialog-type';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-
-/**
- * Data structure passed to dialog components
- */
-export interface DialogComponentData<TData, TResult> {
-  input: TData | null;
-  output: TResult | null;
-}
-
-/**
- * Configuration for opening a dialog
- */
-export interface DialogConfiguration<TComponent, TData = any, TResult = any> {
-  id: string;
-  dialogType: DialogType;
-  priority: number;
-  component: ComponentType<TComponent>;
-  config: MatDialogConfig<DialogComponentData<TData, TResult>> | undefined;
-}
-
-/**
- * Tracked open dialog instance
- */
-interface TrackedDialog {
-  id: string;
-  matDialogRef: MatDialogRef<any, any>;
-  component: ComponentType<any>;
-  dialogType: DialogType;
-  priority: number;
-  openedAt: Date;
-}
+import { DialogConfiguration } from '../../models/shared/dialog-configuration';
+import { TrackedDialog } from '../../models/shared/tracked-dialog';
+import { DialogComponentData } from '../../models/shared/dialog-component-data';
 
 @Injectable({
   providedIn: 'root',
