@@ -113,16 +113,6 @@ export class DialogTestComponent {
   }
 
   /**
-   * Open Profile Form, then after 2 seconds open Volume Overlay
-   */
-  async openProfileFormThenOverlay() {
-    await this.openProfileForm();
-    setTimeout(() => {
-      this.openVolumeOverlay();
-    }, 2000);
-  }
-
-  /**
    * Open Volume Overlay, then after 2 seconds open Profile Form
    */
   async openOverlayThenForm() {
@@ -130,5 +120,55 @@ export class DialogTestComponent {
     setTimeout(() => {
       this.openProfileForm();
     }, 2000);
+  }
+
+  /**
+   * Open Overlay, then after 2 seconds open Profile Form, then close Overlay after 5 seconds
+   */
+  async openOverlayThenFormThenCloseOverlay() {
+    await this.openVolumeOverlay();
+    setTimeout(() => {
+      this.openProfileForm();
+    }, 2000);
+    setTimeout(() => {
+      const id = this.dialogs.getActiveOverlayId();
+      if (id) {
+        this.dialogs.close(id);
+      }
+    }, 5000);
+  }
+
+  /**
+   * Open Profile Form, then after 5 seconds run Process action
+   */
+  openFormThenAfter5SecondsRunProcess() {
+    this.openProfileForm();
+    setTimeout(() => {
+      const profile = this.store.state.entity;
+      if (profile) {
+        this.store.processEntity(profile);
+      }
+    }, 5000);
+  }
+
+  /**
+   * Open Profile Form, then after 5 seconds open Volume Overlay, 
+   * then after another 5 seconds run Save action
+   */
+  openFormThenAfter5SecondsRunSave() {
+    this.openProfileForm();
+    setTimeout(() => {
+      const profile = this.store.state.entity;
+      if (profile) {
+        this.store.processEntity(profile);
+        this.openVolumeOverlay();
+        setTimeout(() => {
+          const profile = this.store.state.entity;
+          if (profile) {
+            this.store.saveEntity(profile);
+          }
+        }, 5000);
+      }
+    }, 5000);
   }
 }

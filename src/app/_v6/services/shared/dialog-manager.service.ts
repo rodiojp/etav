@@ -1,11 +1,12 @@
 import { ComponentType } from '@angular/cdk/portal';
-import { inject, Injectable } from '@angular/core';
+import { DestroyRef, inject, Injectable } from '@angular/core';
 import {
   MatDialog,
   MatDialogRef,
   MatDialogConfig,
 } from '@angular/material/dialog';
 import { DialogType } from '../../models/shared/dialog-type';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 /**
  * Data structure passed to dialog components
@@ -43,8 +44,9 @@ interface TrackedDialog {
 })
 export class DialogManagerService {
   private readonly matDialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
 
-  /** Separate queues for each dialog type */
+  /** Queues per dialog type */
   private modalQueue: DialogConfiguration<any>[] = [];
   private overlayQueue: DialogConfiguration<any>[] = [];
 
@@ -53,7 +55,8 @@ export class DialogManagerService {
   private activeOverlay: TrackedDialog | null = null;
 
   /**
-   * Open a dialog with the given configuration
+   * Open dialog with the given configuration
+   * Queues the dialog if overlay or another dialog is active
    * @param dialog The dialog configuration
    * @return An object with dialog ID and a promise for the result
    */
@@ -61,8 +64,13 @@ export class DialogManagerService {
     dialog: DialogConfiguration<TComponent, TData, TResult>
   ): { id: string; result: Promise<TResult | null> } {
     if (dialog.dialogType === DialogType.MODAL) {
-      this.enqueueDialog(this.modalQueue, dialog);
-      this.tryOpenNextModal();
+      // If overlay active — queue modal
+      if (this.activeOverlay) {
+        this.enqueueDialog(this.modalQueue, dialog);
+      } else {
+        this.enqueueDialog(this.modalQueue, dialog);
+        this.tryOpenNextModal();
+      }
     } else if (dialog.dialogType === DialogType.OVERLAY) {
       this.enqueueDialog(this.overlayQueue, dialog);
       this.tryOpenNextOverlay();
@@ -75,12 +83,14 @@ export class DialogManagerService {
           this.activeOverlay?.id === dialog.id;
         if (found) {
           const ref =
-            this.activeModal?.matDialogRef ??
-            this.activeOverlay?.matDialogRef;
-          ref?.afterClosed().subscribe((res) => {
-            clearInterval(checkInterval);
-            resolve(res ?? null);
-          });
+            this.activeModal?.matDialogRef ?? this.activeOverlay?.matDialogRef;
+          ref
+            ?.afterClosed()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((res) => {
+              clearInterval(checkInterval);
+              resolve(res ?? null);
+            });
         }
       }, 100);
     });
@@ -102,44 +112,58 @@ export class DialogManagerService {
   }
 
   /**
-   * Try to open next modal if none active
+   * Try to open next modal only
+   * if no overlay or modal active
    */
   private tryOpenNextModal() {
-    if (this.activeModal || this.modalQueue.length === 0) return;
+    if (this.activeModal || this.activeOverlay || this.modalQueue.length === 0)
+      return;
+
     const next = this.modalQueue.shift()!;
     this.activeModal = this.openDialog(next);
 
-    this.activeModal.matDialogRef.afterClosed().subscribe(() => {
-      this.activeModal = null;
-      this.tryOpenNextModal();
-    });
+    // Continue modal queue if overlay not blocking
+    this.activeModal.matDialogRef
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.activeModal = null;
+        this.tryOpenNextModal();
+      });
   }
 
   /**
-   * Try to open next overlay if none active (auto-promotes above modal)
+   * Try to open next overlay
+   * always prioritized over modal
    */
   private tryOpenNextOverlay() {
     if (this.activeOverlay || this.overlayQueue.length === 0) return;
     const next = this.overlayQueue.shift()!;
 
-    // Auto-promotion: temporarily "pause" the modal while overlay is open
-    const pausedModal = this.activeModal;
-    if (pausedModal) {
-      this.setDialogBackdrop(pausedModal.matDialogRef, true);
+    // If modal is active, pause its UI interaction
+    if (this.activeModal) {
+      this.setDialogBackdrop(this.activeModal.matDialogRef, true);
     }
 
     this.activeOverlay = this.openDialog(next);
 
-    this.activeOverlay.matDialogRef.afterClosed().subscribe(() => {
-      this.activeOverlay = null;
+    this.activeOverlay.matDialogRef
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.activeOverlay = null;
 
-      // Restore modal when overlay closes
-      if (pausedModal) {
-        this.setDialogBackdrop(pausedModal.matDialogRef, false);
-      }
+        if (this.activeModal) {
+          // Restore modal interaction
+          this.setDialogBackdrop(this.activeModal.matDialogRef, false);
+        } else {
+          // If no modal active, open queued modals
+          this.tryOpenNextModal();
+        }
 
-      this.tryOpenNextOverlay();
-    });
+        // Open next overlay if queued
+        this.tryOpenNextOverlay();
+      });
   }
 
   /**
@@ -154,16 +178,6 @@ export class DialogManagerService {
       TComponent,
       DialogComponentData<TData, TResult>
     >(dialog.component, dialog.config);
-
-    // Layer control: overlays above modals
-    const element = ref.componentInstance
-      ? (ref as any)._containerInstance?._elementRef.nativeElement as HTMLElement
-      : null;
-    if (dialog.dialogType === DialogType.OVERLAY && element) {
-      element.style.zIndex = '2000'; // higher than modal z-index
-    } else if (dialog.dialogType === DialogType.MODAL && element) {
-      element.style.zIndex = '1000';
-    }
 
     return {
       id: dialog.id,
@@ -185,7 +199,7 @@ export class DialogManagerService {
       .nativeElement as HTMLElement | null;
     if (dialogEl) {
       dialogEl.style.pointerEvents = pause ? 'none' : 'auto';
-      dialogEl.style.filter = pause ? 'blur(2px) brightness(0.7)' : 'none';
+      // dialogEl.style.filter = pause ? 'blur(2px) brightness(0.7)' : 'none';
     }
   }
 
@@ -215,7 +229,7 @@ export class DialogManagerService {
   }
 
   /**
-   * Close all dialogs and queues
+   * Close all dialogs and reset queues
    */
   closeAll(): void {
     this.activeModal?.matDialogRef.close();
@@ -224,6 +238,58 @@ export class DialogManagerService {
     this.activeOverlay = null;
     this.modalQueue = [];
     this.overlayQueue = [];
+  }
+
+  /**
+   * Get active modal dialog ID
+   * @returns The active modal dialog ID or null
+   */
+  getActiveModalId(): string | null {
+    return this.activeModal ? this.activeModal.id : null;
+  }
+
+  /**
+   * Get active overlay dialog ID
+   * @returns The active overlay dialog ID or null
+   */
+  getActiveOverlayId(): string | null {
+    return this.activeOverlay ? this.activeOverlay.id : null;
+  }
+
+  /**
+   * Check if a Modal with given ID is currently open
+   * @param id The dialog ID
+   * @return True if open, false otherwise
+   */
+  isModalOpen(id: string): boolean {
+    return this.activeModal?.id === id;
+  }
+
+  /**
+   * Check if a Modal with given ID is in the queue
+   * @param id The dialog ID
+   * @return True if in queue, false otherwise
+   */
+  isModalInQueue(id: string): boolean {
+    return this.modalQueue.some((d) => d.id === id);
+  }
+
+  /**
+   * Check if an Overlay with given ID is currently open
+   * @param id The dialog ID
+   * @return True if open, false otherwise
+   */
+  isOverlayOpen(id: string): boolean {
+    return this.activeOverlay?.id === id;
+  }
+
+  /**
+   * Check if an Overlay with given ID is in the queue
+   * @param id The dialog ID
+   * @return True if in queue, false otherwise
+   */
+  isOverlayInQueue(id: string): boolean {
+    return this.overlayQueue.some((d) => d.id === id);
   }
 
   /**
